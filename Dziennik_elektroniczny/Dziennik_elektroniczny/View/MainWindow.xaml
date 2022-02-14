@@ -1,0 +1,875 @@
+﻿<Window x:Class="Dziennik_elektroniczny.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:Dziennik_elektroniczny"
+        xmlns:vm="clr-namespace:Dziennik_elektroniczny.ViewModel"
+       
+        mc:Ignorable="d"
+        Title="Dziennik elektroniczny" Height="475.5" Width="879.5">
+
+    <Window.Resources>
+        <vm:MainVM x:Key="ViewModel"/>
+    </Window.Resources>
+
+
+
+    <Grid DataContext="{StaticResource ViewModel}">
+        <TabControl Margin="0,0,10,0">
+            <TabItem x:Name="addStudent" Header="Add Student">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="5">
+                        <TextBlock Text="Name:"/>
+                        <TextBox x:Name="name"  Text="{Binding TabAddStudentVM.Name}"/>
+
+                        <TextBlock Text="Second Name:"/>
+                        <TextBox x:Name="secondName" Text="{Binding TabAddStudentVM.SecondName}"/>
+
+                        <TextBlock Text="Residence:"/>
+                        <TextBox x:Name="residence" Text="{Binding TabAddStudentVM.Residence}"/>
+
+                        <TextBlock Text="Sex:"/>
+                        <TextBox x:Name="sex" Text="{Binding TabAddStudentVM.Sex}"/>
+
+                        <TextBlock Text="Phone Number (9 digits):"/>
+                        <TextBox x:Name="phone_number" Text="{Binding TabAddStudentVM.Phone_Number}"/>
+
+                        <TextBlock Text="Birth Date Year-Month-Day:"/>
+                        <TextBox x:Name="birth_date" Text="{Binding TabAddStudentVM.Birth_Date}"/>
+
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="button_add" Grid.Column="0" Content="Add student to database"
+                                    Margin="5"
+                                    Command="{Binding TabAddStudentVM.ADD}"
+                                    IsEnabled="{Binding TabAddStudentVM.AddingAvailable, Mode=OneWay}"
+                             />
+                            <Button x:Name="button_edit" Grid.Column="1" Content="Edit" 
+                                    Margin="5"
+                                    Command="{Binding TabAddStudentVM.EDIT}"
+                                    IsEnabled="{Binding TabAddStudentVM.EditingAvailable, Mode=OneWay}"
+                             />
+                        </Grid>
+
+                    </StackPanel>
+                    <!-- LISTA Uczniów  -->
+                    <DataGrid 
+                        x:Name="dg_students"
+                        Grid.Column="1"
+                        AutoGenerateColumns="False"
+                        Margin="5"
+                        AlternatingRowBackground="Lavender"
+                        GridLinesVisibility="None"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding TabAddStudentVM.Students}"
+                        SelectedItem="{Binding TabAddStudentVM.Current_Student}"
+                        SelectedIndex="{Binding TabAddStudentVM.CheckedID, Mode=TwoWay}"    
+                            
+                    >
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Nazwisko" Binding="{Binding Student_secondName}"/>
+                            <DataGridTextColumn Header="Imię" Binding="{Binding Student_name}"/>
+                            <DataGridTextColumn Header="Data Urodzenia" Binding="{Binding Birth_date}"/>
+                            <DataGridTextColumn Header="Miasto" Binding="{Binding Student_residence}"/>
+                            <DataGridTextColumn Header="Płeć" Binding="{Binding Student_sex}"/>
+                            <DataGridTextColumn Header="Nr Telefonu" Binding="{Binding Phone_number}"/>
+
+                        </DataGrid.Columns>
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabAddStudentVM.LOADFORM}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </DataGrid>
+                </Grid>
+
+            </TabItem>
+            <TabItem x:Name="students_in_classes" Header="Check Students">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="353*"/>
+                        <ColumnDefinition Width="38*"/>
+                        <ColumnDefinition Width="374*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--Classes List-->
+                    <ListView x:Name="classes" Grid.Column="0"  
+                              SelectedItem="{Binding TabStudentInClassesVM.CurrentClass}" 
+                              ItemsSource="{Binding TabStudentInClassesVM.Classes}"
+                              SelectedIndex="{Binding TabStudentInClassesVM.SelectedClassIndex, Mode=TwoWay}" Grid.ColumnSpan="2" Margin="0,0,0,169"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentInClassesVM.LoadClasses}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="150" x:Name="nazwaklasy">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Class_Name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Class Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=nazwaklasy}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentInClassesVM.LoadAllClasses}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock  Text="{Binding Class_Semester}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Semestr"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentcomments" Grid.Column="3" 
+                              SelectedItem="{Binding TabStudentInClassesVM.CurrentStudent}" 
+                              ItemsSource="{Binding TabStudentInClassesVM.Students}"
+                              SelectedIndex="{Binding TabStudentInClassesVM.SelectedStudentIndex}"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentInClassesVM.LoadStudents}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna1" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=kolumna1}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentInClassesVM.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna2">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="kolumna3">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Refresh List" Grid.Column="1" HorizontalAlignment="Left" Height="63" Margin="223,300,0,0" VerticalAlignment="Top" Width="120"
+                            Command="{Binding TabStudentInClassesVM.Refresh}"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="checkcomments" Header="Check Comments">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="353*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="374*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--Comment List-->
+                    <ListView x:Name="comments" Grid.Column="0"  
+                              SelectedItem="{Binding TabStudentComments.CurrentComment}" 
+                              ItemsSource="{Binding TabStudentComments.Comments}"
+                              SelectedIndex="{Binding TabStudentComments.SelectedCommentIndex, Mode=TwoWay}" Grid.ColumnSpan="2" Margin="0,0,0,126"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentComments.LoadComments}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="300" x:Name="trescuwagi">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Comment_Content}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Comment" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=trescuwagi}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentComments.LoadAllComments}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock  Text="{Binding Comment_Date}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Data"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="students" Grid.Column="3" 
+                              SelectedItem="{Binding TabStudentComments.CurrentStudent}" 
+                              ItemsSource="{Binding TabStudentComments.Students}"
+                              SelectedIndex="{Binding TabStudentComments.SelectedStudentIndex}"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentComments.LoadStudent}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="col1" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=col1}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentComments.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="col2">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="col3">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Refresh" Grid.Column="1" HorizontalAlignment="Left" Margin="295,296,0,0" VerticalAlignment="Top" Width="103" Height="56"
+                            Command="{Binding TabStudentComments.Refresh}"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="checkabsences" Header="Check Absences">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="353*"/>
+                        <ColumnDefinition Width="38*"/>
+                        <ColumnDefinition Width="374*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--Comment List-->
+                    <ListView x:Name="absences" Grid.Column="0"  
+                              
+                              SelectedItem="{Binding TabStudentAbsences.CurrentAbsence}" 
+                              ItemsSource="{Binding TabStudentAbsences.Absences}"
+                              SelectedIndex="{Binding TabStudentAbsences.SelectedAbsenceIndex, Mode=TwoWay}" Grid.ColumnSpan="2" Margin="0,0,0,137"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentAbsences.LoadAbsence}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="150" x:Name="datanieobecnosci">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Absence_Date}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Absence Date" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=datanieobecnosci}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentAbsences.LoadAllAbsences}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentsabsences" Grid.Column="3" 
+                              SelectedItem="{Binding TabStudentAbsences.CurrentStudent}" 
+                              ItemsSource="{Binding TabStudentAbsences.Students}"
+                              SelectedIndex="{Binding TabStudentAbsences.SelectedStudentIndex}"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentAbsences.LoadStudent}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="col1absence" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=col1}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentAbsences.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="col2absence">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="col3absence">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Refresh" Grid.Column="1" HorizontalAlignment="Left" Margin="304,304,0,0" VerticalAlignment="Top" Width="75"
+                            Command="{Binding TabStudentAbsences.Refresh}"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="grades_WthNames" Header="Check Grades">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="353*"/>
+                        <ColumnDefinition Width="38*"/>
+                        <ColumnDefinition Width="374*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--GradesWithNames List-->
+                    <ListView x:Name="grades" Grid.Column="0"  
+                              SelectedItem="{Binding TabStudentGradesWithSubjectNames.CurrentGradeSubject}" 
+                              ItemsSource="{Binding TabStudentGradesWithSubjectNames.GradesWithSubjectNames}"
+                              SelectedIndex="{Binding TabStudentGradesWithSubjectNames.SelectedGradeWithSubjectNameIndex, Mode=TwoWay}" Grid.ColumnSpan="2" Margin="0,0,0,96"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentGradesWithSubjectNames.LoadGrades}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="150" x:Name="nazwaprzedmiotu">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Subject_Name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Class Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=nazwaprzedmiotu}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentGradesWithSubjectNames.LoadAllGrades}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock  Text="{Binding Grade_Value}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Grade"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentgrades" Grid.Column="3" 
+                              SelectedItem="{Binding TabStudentGradesWithSubjectNames.CurrentStudent}" 
+                              ItemsSource="{Binding TabStudentGradesWithSubjectNames.Students}"
+                              SelectedIndex="{Binding TabStudentGradesWithSubjectNames.SelectedStudentIndex}"
+                    >
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding TabStudentGradesWithSubjectNames.LoadStudent}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna1sg" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=kolumna1sg}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentGradesWithSubjectNames.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna2sg">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="kolumna3sg">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Refresh" Grid.Column="1" HorizontalAlignment="Left" Margin="304,343,0,0" VerticalAlignment="Top" Width="75"
+                            Command="{Binding TabStudentGradesWithSubjectNames.Refresh}"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="check_average" Header="Check Average">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+
+                    </Grid.ColumnDefinitions>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentaverage" Grid.Column="0" 
+                              SelectedItem="{Binding TabStudentAverage.CurrentStudent}" 
+                              ItemsSource="{Binding TabStudentAverage.Students}"
+                              SelectedIndex="{Binding TabStudentAverage.SelectedStudentIndex}" Margin="0,0,10,0"
+                    >
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna1saverage" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=kolumna1saverage}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabStudentAverage.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna2sgaverage">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="kolumna3sgaverage">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Calculate Average" Grid.Column="1" HorizontalAlignment="Left" Margin="128,144,0,0" VerticalAlignment="Top" Width="74"
+                            Command="{Binding TabStudentAverage.Average}"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="add_grade" Header="Add Grade">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="23*"/>
+                        <ColumnDefinition Width="75*"/>
+                        <ColumnDefinition Width="20*"/>
+                        <ColumnDefinition Width="291*"/>
+                        <ColumnDefinition Width="41*"/>
+                        <ColumnDefinition Width="406*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--Classes List-->
+                    <ListView x:Name="addgradestostudents" Grid.Column="0"  
+                              SelectedItem="{Binding TabAddGradeToStudent.CurrentSubject}" 
+                              ItemsSource="{Binding TabAddGradeToStudent.Subjects}"
+                              SelectedIndex="{Binding TabAddGradeToStudent.SelectedSubjectIndex, Mode=TwoWay}" Grid.ColumnSpan="4" Margin="0,0,0,137"
+                    >
+
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="150" x:Name="nazwaprzedmiotuwocenach">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Subjects_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Class Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=nazwaprzedmiotuwocenach}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabAddGradeToStudent.LoadAllSubjects}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentaddgrade" Grid.Column="5" 
+                              SelectedItem="{Binding TabAddGradeToStudent.CurrentStudent}" 
+                              ItemsSource="{Binding TabAddGradeToStudent.Students}"
+                              SelectedIndex="{Binding TabAddGradeToStudent.SelectedStudentIndex}"
+                    >
+
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna1addgrade" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=kolumna1addgrade}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabAddGradeToStudent.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna2addgrade">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="kolumna3addgrade">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="47,286,0,0" TextWrapping="Wrap" Text="Grade Value: " VerticalAlignment="Top" Width="76" Grid.ColumnSpan="3"/>
+                    <TextBlock Grid.Column="3" HorizontalAlignment="Left" Margin="20,286,0,0" TextWrapping="Wrap" Text="{Binding ElementName=age, Path=Value}" VerticalAlignment="Top" RenderTransformOrigin="-1.459,-0.094"/>
+                    <Slider Value="{Binding TabAddGradeToStudent.Grade_Value}" x:Name="age" Maximum="6" Minimum="1" TickFrequency="1" Grid.Column="1" HorizontalAlignment="Left" Margin="47,314,0,0" VerticalAlignment="Top" Height="21" Width="117" IsSnapToTickEnabled="True" Grid.ColumnSpan="3"/>
+                    <Button Content="Add Grade to DB" Grid.Column="1" HorizontalAlignment="Left" Margin="47,370,0,0" VerticalAlignment="Top" Width="135" Click="Button_Click"
+                            Command="{Binding TabAddGradeToStudent.Add}" Grid.ColumnSpan="3"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="addstudent_toclass" Header="Add Student To Class">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="21*"/>
+                        <ColumnDefinition Width="353*"/>
+                        <ColumnDefinition Width="38*"/>
+                        <ColumnDefinition Width="374*"/>
+                    </Grid.ColumnDefinitions>
+                    <!--Classes List-->
+                    <ListView x:Name="addtoclass" Grid.Column="0"  
+                              SelectedItem="{Binding TabAddStudentToClass.CurrentClass}" 
+                              ItemsSource="{Binding TabAddStudentToClass.Classes}"
+                              SelectedIndex="{Binding TabAddStudentToClass.SelectedClassIndex, Mode=TwoWay}" Grid.ColumnSpan="2" Margin="0,0,0,169"
+                    >
+                        
+                        <ListView.View>
+                            <GridView>
+
+                                <GridView.Columns>
+                                    <GridViewColumn Width="150" x:Name="addclassname">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Class_Name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Class Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=addclassname}">
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabAddStudentToClass.LoadAllClasses}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="100">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock  Text="{Binding Class_Semester}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Semestr"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                </GridView.Columns>
+                            </GridView>
+
+                        </ListView.View>
+
+                    </ListView>
+                    <!-- Lista Studentów -->
+                    <ListView x:Name="studentaddtoclass" Grid.Column="3" 
+                              SelectedItem="{Binding TabAddStudentToClass.CurrentStudent}" 
+                              ItemsSource="{Binding TabAddStudentToClass.Students}"
+                              SelectedIndex="{Binding TabAddStudentToClass.SelectedStudentIndex}"
+                    >
+                        
+
+                        <ListView.View>
+                            <GridView>
+                                <GridView.Columns>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna1addtoclass" >
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_name}" FontSize="14"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Name" Background="AliceBlue" Width="{Binding ActualWidth, ElementName=kolumna1addtoclass}" >
+                                             <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseDown">
+                                                    <i:InvokeCommandAction Command="{Binding TabAddStudentToClass.LoadAllStudents}"/>
+                                                </i:EventTrigger>
+                                              </i:Interaction.Triggers>
+                                            </TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="80" x:Name="kolumna2addtoclass">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_secondName}" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="SecondName"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+
+                                    <GridViewColumn Width="30" x:Name="kolumna3addtoclass">
+                                        <GridViewColumn.CellTemplate >
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Student_sex}"  HorizontalAlignment="Stretch"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                        <GridViewColumn.Header>
+                                            <TextBlock Text="Sex"></TextBlock>
+                                        </GridViewColumn.Header>
+                                    </GridViewColumn>
+                                </GridView.Columns>
+
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Button Content="Add Student To Class" Grid.Column="1" HorizontalAlignment="Left" Height="63" Margin="223,300,0,0" VerticalAlignment="Top" Width="120"
+                            Command="{Binding TabAddStudentToClass.Add}"/>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
+
